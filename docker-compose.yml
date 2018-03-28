@@ -1,0 +1,73 @@
+version: '3'
+services:
+
+  web:
+    image: nginx
+    container_name: suara_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - php
+    volumes:
+      - ./www:/var/www
+      - ./sites:/etc/nginx/conf.d
+      - ./conf/nginx.conf:/etc/nginx/nginx.conf
+
+  php:
+    build:
+        context: ./conf
+    image: local-php5.6-fpm
+    container_name: suara_php
+    working_dir: /var/www
+    volumes:
+      - ./www:/var/www
+      - ./conf/supervisor:/etc/supervisor/conf.d
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mysql
+      - redis
+      - mongo
+      - elasticsearch
+
+  mysql:
+    image: mysql
+    container_name: suara_mysql
+    ports:
+      - "33061:3306"
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./data/mysqldump:/data/mysqldump
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      
+  mongo:
+    image: mongo
+    container_name: suara_mongo
+    ports:
+      - "27017:27017"
+    
+  redis:
+    image: redis
+    container_name: suara_redis
+    ports:
+      - "6379:6379"
+    entrypoint: redis-server --appendonly yes
+    
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.1
+    container_name: suara_elasticsearch
+    environment:
+      - cluster.name=suara-elastic
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+      - xpack.ml.enabled=false
+      - xpack.graph.enabled=false
+      - xpack.watcher.enabled=false
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"

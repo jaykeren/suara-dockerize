@@ -13,7 +13,10 @@ services:
       - ./conf/nginx.conf:/etc/nginx/nginx.conf
       - ./logs:/var/log/suara
     networks:
-      - local-dev
+      local-dev:
+        aliases:
+          - api.suara.local
+          - api2.suara.local
 
   php:
     build:
@@ -29,7 +32,7 @@ services:
       - "9000:9000"
     networks:
       - local-dev
-
+      
   mysql:
     image: mysql
     container_name: suara_mysql
@@ -78,5 +81,6 @@ services:
       - "9200:9200"
     networks:
       - local-dev
+      
 networks:
   local-dev:

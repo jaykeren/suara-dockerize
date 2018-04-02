@@ -1,7 +1,7 @@
 FROM php:5.6-fpm
 
 RUN apt-get update
-RUN apt-get install -y autoconf pkg-config libssl-dev
+RUN apt-get install -y autoconf pkg-config libssl-dev vim
 
 RUN pecl install mongodb-1.2.2
 RUN docker-php-ext-install pdo_mysql bcmath
@@ -28,4 +28,11 @@ RUN apt-get install -y supervisor && \
 	
 COPY php.ini /usr/local/etc/php/conf.d/40-custom.ini
 
-#CMD ["/usr/bin/supervisord"]
+# Install Phalcon
+RUN apt-get install -y git
+RUN git clone https://github.com/phalcon/cphalcon \
+	&& cd cphalcon \
+	&& git checkout 3.2.x \
+	&& cd build \
+	&& ./install \
+	&& echo "extension=phalcon.so" > /usr/local/etc/php/conf.d/phalcon.ini
